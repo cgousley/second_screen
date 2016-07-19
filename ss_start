@@ -1,0 +1,73 @@
+#!/bin/bash
+#This bash script allows you to create a second screen and broadcast it via VNC
+#I wrote this to automate my work
+
+##############################################################
+#Configuration How-to credits go to kjans. How-to can be found here: https://bbs.archlinux.org/viewtopic.php?id=191555
+
+#Step 1: Find resolution of second screen device and input it into Konsole (for this case, the resolution is 1280 x 1024
+###Run "gtf 1280 1024 60"
+
+#This will generate new Modeline
+###Modeline "1280x1024_60.00"  108.88  1280 1360 1496 1712  1024 1025 1028 1060  -HSync +Vsync
+
+#Step 2: Generate a new mode based on the modeline received from Step 1:
+###Run "xrandr --newmode "1280x1024_60.00"  108.88  1280 1360 1496 1712  1024 1025 1028 1060  -HSync +Vsync"
+
+#Step 3: Add mode to disconnected output (in my case, VIRTUAL1)
+###Run "xrandr --addmode VIRTUAL1 1280x1024_60.00"
+
+#Step 4: Enable the disconnected monitor using the newly added mode and use it to extend the desktop to the left of your main monitor (in my case, eDP1)
+###Run "xrandr --output VGA1 --mode 1280x1024_60.00 --left-of LVDS1"
+
+#Step 5: Export the invisible part of your desktop using VNC
+###Run "x11vnc -clip 1280x1024+0+0"
+
+#Step 6: If using another computer, run this on it:
+###Run "vncviewer -encodings "tight copyrect""
+
+##############################################################
+
+#This displays your IP address to input into your VNC viewer
+my_ip=$(ip route get 8.8.8.8 | awk '/8.8.8.8/ {print $NF}')
+echo "Your IP address is $my_ip";
+read -n1 -rsp $'Press any key to continue... \n';
+
+devices="Dell Kindle_Fire Quit"
+    select device in $devices
+      do
+      
+	if [ "$device" = "Dell" ]
+	  then
+	    konsole --noclose -e ss_reset #this runs the reset script in a new terminal
+	    gtf 1280 736 60;
+	    xrandr --newmode "1280x736_60.00"  76.08  1280 1336 1472 1664  736 737 740 762  -HSync +Vsync;
+	    xrandr --addmode VIRTUAL1 1280x736_60.00;
+	    xrandr --output VIRTUAL1 --mode 1280x736_60.00 --left-of eDP1;
+	    x11vnc -clip 1280x736+0+0
+	   break
+	    
+
+	  #This is for my Kindle Fire
+	  elif [ "$device" = "Kindle_Fire" ]
+	  then
+	    konsole --noclose -e ss_reset #this runs the reset script in a new terminal
+	    gtf 1024 600 60
+	    xrandr --newmode "1024x600_60.00"  48.96  1024 1064 1168 1312  600 601 604 622  -HSync +Vsync
+	    xrandr --addmode VIRTUAL1 1024x600_60.00
+	    xrandr --output VIRTUAL1 --mode 1024x600_60.00 --left-of eDP1
+	    x11vnc -ncache -clip 1024x600+0+0
+	    echo "Starting Kindle...";
+	    break
+	 
+	 #This is for Quit
+	 elif [ "$device" = "Quit" ]
+	  then
+	    break  
+	 #This is for an error
+	  else
+	    clear;
+	    echo "I'm sorry Dave, I'm afraid I can't do that.";
+	    break
+	fi
+    done
