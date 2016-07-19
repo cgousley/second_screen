@@ -1,0 +1,19 @@
+#! /bin/bash
+
+#Displays prompt asking if ready for resest, and waits for input
+read -n1 -rsp $'Are you ready to reset? \n
+Type "Y" when ready\n' ready;
+
+#This checks input to see if it is "Y", if not "Y", displays error message 
+if [ "$ready" = "Y" ]
+then
+  killall x11vnc;
+  xrandr -s 0
+  echo "Reset!";
+
+else
+  clear;
+  echo "I'm sorry Dave, I'm afraid I can't do that.";
+  echo "You must press 'Y' when ready to reset."
+  echo "Daisy Daisy, give me your answer do...."
+fi
